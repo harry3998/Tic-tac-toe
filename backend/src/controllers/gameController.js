@@ -1,7 +1,8 @@
 const pool = require('../service/Pool.js');
 
 exports.createRoom = async (req, res) => {
-  const { creatorId } = req.body; // Assume creatorId is passed from the client
+  console.log('createRoom');
+  const { creatorId } = req.user.id; // Assume creatorId is passed from the client
 
   try {
     const result = await pool.query('INSERT INTO rooms (creator) VALUES (?)', [creatorId]);
@@ -24,6 +25,7 @@ exports.getRooms = async (req, res) => {
 
 exports.joinRoom = async (req, res) => {
   const {userId, roomId} = req.body;
+  console.log('=========')
   try {
     const [result] = await pool.query('SELECT * FROM rooms WHERE id = ?', [roomId]);
     if(result[0].creator == userId)

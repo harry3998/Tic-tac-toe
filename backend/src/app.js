@@ -4,7 +4,6 @@ const { Server } = require('socket.io');
 const authRouter = require('./routes/auth.js');
 const gameRouter = require('./routes/game.js');
 const cors = require('cors');
-
 const app = express();
 
 app.use(cors({
@@ -45,7 +44,7 @@ const checkWinner = (board) => {
 }
 
 io.on('connection', (socket) => {
-  socket.on('join_room', ({ roomId }) => {
+  socket.on('join_room', ({ roomId, userId }) => {
     socket.join(roomId);
     if (!games[roomId]) {
       games[roomId] = {

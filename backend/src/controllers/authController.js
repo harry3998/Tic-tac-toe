@@ -33,11 +33,12 @@ exports.loginUser = async (req, res) => {
     if (user && await bcrypt.compare(password, user.password)) {
       const token = jwt.sign(
         {id: user.id, email: user.email},
-        'real-expert',
-        {expiresIn: '1d'}
+        'mine',
+        {expiresIn: '1h'}
       );
+      console.log('login===', token);
       res.status(200).json({
-        message: 'Login successful', 
+        message: 'Login successful',
         token,
         user: {
           id: user.id,

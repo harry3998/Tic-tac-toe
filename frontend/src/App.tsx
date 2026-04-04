@@ -1,20 +1,16 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Login from "./components/pages/Auth/Login";
-import Register from "./components/pages/Auth/Register";
-import Game from "./components/pages/Game/Game";
-import Rooms from "./components/pages/Rooms/GameRoomList";
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Login from './pages/Login';
+import Lobby from './pages/Lobby';
+import Game from './pages/Game';
 
-function App() {
+export default function App() {
   return (
     <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Register />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/rooms" element={<Rooms />} />
-          <Route path="/game/:roomId" element={<Game />} />
-        </Routes>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/lobby" element={<Lobby />} />
+        <Route path="/game/:id" element={<Game />} />
+      </Routes>
     </BrowserRouter>
   );
 }
-
-export default App;
