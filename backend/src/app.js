@@ -6,8 +6,6 @@ const gameRouter = require('./routes/game.js');
 const cors = require('cors');
 
 const app = express();
-// const server = http.createServer(app);
-// const io = new Server(server);
 
 app.use(cors({
   origin: "*",
@@ -15,15 +13,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use('/auth', authRouter);
-app.use('/game', gameRouter);
-
-// //insert database
-// pool.connect()
-//   .then(() => {
-//     console.log('database connected'); // you can create table in here by inserting query statement.
-//   })
-
-// Socket.IO setup
+app.use('/game', gameRouter)
 
 const server = http.createServer(app);
 
@@ -34,27 +24,25 @@ const io = new Server(server, {
   },
 });
 
-// io.on('connection', (socket) => {
-//   console.log('A user connected:', socket.id);
-
-//   socket.on('join_room', (data) => {
-//     socket.join(data.roomId);
-//     console.log(`User ${socket.id} joined room: ${data.roomId}`);
-//   });
-
-//   socket.on('make_move', ({ roomId, index, player }) => {
-//     // Broadcast the move to all clients in the room
-//     socket.to(roomId).emit('move_made', { index, player });
-//   });
-  
-//   socket.on('disconnect', () => {
-//     console.log('User disconnected:', socket.id);
-//   });
-// });
-
-// Start the server
-
 const games = {};
+
+const checkWinner = (board) => {
+  const wins = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
+  ];
+
+  for (let [a, b, c] of wins) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return board[a];
+    }
+  }
+
+  if (!board.includes(null)) return 'draw';
+
+  return null;
+}
 
 io.on('connection', (socket) => {
   socket.on('join_room', ({ roomId }) => {
@@ -62,22 +50,39 @@ io.on('connection', (socket) => {
     if (!games[roomId]) {
       games[roomId] = {
         board: Array(9).fill(null),
-        turn: 'X'
+        turn: 'X',
+        players: {
+          X: null,
+          O: null
+        }
       };
+    }
+
+    const game = games[roomId];
+    if (!game.players.X) {
+      game.players.X = userId;
+    } else if (!game.players.O) {
+      game.players.O = userId;
     }
   });
 
-  socket.on('make_move', ({ roomId, index, player }) => {
+  socket.on('make_move', ({ roomId, index, userId }) => {
     const game = games[roomId];
     if (!game) return;
 
-    if (game.board[index] !== null) return;
+    const player = game.players.X === userId ? 'X' :
+      game.players.O === userId ? 'O' : null;
+
+    if (!player) return;
     if (game.turn !== player) return;
+    if (game.board[index] !== null) return;
 
     game.board[index] = player;
     game.turn = player === 'X' ? 'O' : 'X';
 
-    io.to(roomId).emit('move_made', game);
+    const result = checkWinner(game.board);
+
+    io.to(roomId).emit('move_made', { ...game, result });
   });
 });
 

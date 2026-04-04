@@ -25,14 +25,14 @@ exports.getRooms = async (req, res) => {
 exports.joinRoom = async (req, res) => {
   const {userId, roomId} = req.body;
   try {
-    const [result] = await pool.query(`SELECT * FROM rooms WHERE id = '${roomId}'`);
+    const [result] = await pool.query('SELECT * FROM rooms WHERE id = ?', [roomId]);
     if(result[0].creator == userId)
     {
       res.status(200).json({status: 'ok'});
       return ;
     }
     if(!result[0].joiner) {
-      const UpdatedData = await pool.query(`UPDATE rooms SET joiner = ${userId}, status = 1 WHERE id = ${roomId}`);
+      const UpdatedData = await pool.query('UPDATE rooms SET joiner = ?, status = 1 WHERE id = ?', [userId, roomId]);
       res.status(200).json({status: 'ok'});
     }
     else {
@@ -50,7 +50,7 @@ exports.joinRoom = async (req, res) => {
 exports.getOneRoom = async (req, res) => {
   const {roomId} = req.body;
   try {
-    const result = await pool.query(`SELECT * FROM rooms WHERE id = '${roomId}'`);
+    const result = await pool.query('SELECT * FROM rooms WHERE id = ?', [roomId]);
     res.status(200).json(result[0]);
   }
   catch {
